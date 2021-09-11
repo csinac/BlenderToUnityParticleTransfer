@@ -49,7 +49,7 @@ class PEXPORT_PT_main_panel(bpy.types.Panel):
         
         exportRow = layout.row()
         exportRow.operator("particle_export.export")
-        exportRow.enabled = pe_properties.exporter.ready()
+        exportRow.enabled = pe_properties.exporter.is_ready()
 
 
 class PEXPORT_OT_Export(bpy.types.Operator):
