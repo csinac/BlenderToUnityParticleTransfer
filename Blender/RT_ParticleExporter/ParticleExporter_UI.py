@@ -1,6 +1,7 @@
 import bpy
 import sys
 import os
+import importlib
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
@@ -12,6 +13,9 @@ class PEProperties(bpy.types.PropertyGroup):
     ps_container: bpy.props.PointerProperty(name="Particle System", type=bpy.types.Object)
     output_path: bpy.props.StringProperty(name="Output Folder", default="", maxlen=1024, subtype='DIR_PATH')
     filename: bpy.props.StringProperty(name="Filename", default="particles", maxlen=256)
+
+    frame_start: bpy.props.IntProperty(name="Start Frame", default = 1)
+    frame_end: bpy.props.IntProperty(name="End Frame", default = 250)
 
     export_positions: bpy.props.BoolProperty(name="Export Positions", default=True)
     export_velocities: bpy.props.BoolProperty(name="Export Velocities")
@@ -40,10 +44,13 @@ class PEXPORT_PT_main_panel(bpy.types.Panel):
         layout.prop(pe_properties, "output_path")
         layout.prop(pe_properties, "filename")
 
-        dataCol = layout.column()
-        posRow = dataCol.row();
+        data_box = layout.box()
+        posRow = data_box.row();
         posRow.enabled = False;
         posRow.prop(pe_properties, "export_positions")
+        
+        data_box.prop(pe_properties, "frame_start")
+        data_box.prop(pe_properties, "frame_end")
 
         layout.operator("particle_export.get_particles")
         
@@ -59,6 +66,13 @@ class PEXPORT_OT_Export(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         pe_properties = scene.particle_export
+        
+        path = pe_properties.output_path
+        filename = pe_properties.filename + ".rtp"
+        start = pe_properties.frame_start
+        end = pe_properties.frame_end
+        
+        pe_properties.exporter.export(path, filename, start, end)
 
         return {'FINISHED'}
 
@@ -78,7 +92,7 @@ class PEXPORT_OT_GetParticles(bpy.types.Operator):
         elif len(selection) > 1:
             print("You must select a single object")
             return {'CANCELLED'}
-
+        
         if pe_properties.exporter.get_particle_system(selection[0]):
             pe_properties.ps_container = selection[0]
         else:
