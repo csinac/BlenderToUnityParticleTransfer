@@ -1,15 +1,16 @@
 using UnityEngine;
 
-namespace RectangleTrainer.BlenderParticleTransfer.Renderer
+namespace RectangleTrainer.BlenderParticleTransfer.Render
 {
     public abstract class AFrameBasedParticleRenderer : MonoBehaviour
     {
         protected BlenderParticleInfo particleInfo;
         protected int age;
 
-        public void Set(BlenderParticleInfo particleInfo) {
+        public virtual void Set(BlenderParticleInfo particleInfo) {
             this.particleInfo = particleInfo;
             age = 0;
+            Render();
         }
 
         protected abstract void Render();
@@ -19,7 +20,7 @@ namespace RectangleTrainer.BlenderParticleTransfer.Renderer
                 Destroy(gameObject);
                 return;
             }
-
+            
             Render();
             age++;
         }

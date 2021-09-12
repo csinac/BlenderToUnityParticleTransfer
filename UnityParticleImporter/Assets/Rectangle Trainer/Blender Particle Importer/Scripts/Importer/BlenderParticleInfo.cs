@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace RectangleTrainer.BlenderParticleTransfer
 {
+    [Serializable]
     public struct BlenderParticleInfo
     {
         public float birthTime;
@@ -9,6 +11,7 @@ namespace RectangleTrainer.BlenderParticleTransfer
         public int lifeTime;
     }
 
+    [Serializable]
     public struct BlenderParticleSnapshot
     {
         public float x;
