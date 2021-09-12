@@ -1,7 +1,6 @@
 import bpy
 import sys
 import os
-import importlib
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
@@ -16,7 +15,8 @@ class PEProperties(bpy.types.PropertyGroup):
 
     frame_start: bpy.props.IntProperty(name="Start Frame", default = 1)
     frame_end: bpy.props.IntProperty(name="End Frame", default = 250)
-
+    
+    flip_yz: bpy.props.BoolProperty(name="Flip YZ", default=True)
     export_positions: bpy.props.BoolProperty(name="Export Positions", default=True)
     export_velocities: bpy.props.BoolProperty(name="Export Velocities")
 
@@ -45,6 +45,7 @@ class PEXPORT_PT_main_panel(bpy.types.Panel):
         layout.prop(pe_properties, "filename")
 
         data_box = layout.box()
+        data_box.prop(pe_properties, "flip_yz")
         posRow = data_box.row();
         posRow.enabled = False;
         posRow.prop(pe_properties, "export_positions")
@@ -68,11 +69,12 @@ class PEXPORT_OT_Export(bpy.types.Operator):
         pe_properties = scene.particle_export
         
         path = pe_properties.output_path
-        filename = pe_properties.filename + ".rtp"
+        filename = pe_properties.filename
         start = pe_properties.frame_start
         end = pe_properties.frame_end
+        flip_yz = pe_properties.flip_yz
         
-        pe_properties.exporter.export(path, filename, start, end)
+        pe_properties.exporter.export(path, filename, start, end, flip_yz)
 
         return {'FINISHED'}
 

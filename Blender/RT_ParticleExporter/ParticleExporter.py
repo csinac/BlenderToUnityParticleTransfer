@@ -20,11 +20,10 @@ class ParticleExporter():
 
         self.__particle_system = particle_systems[0]
         self.__particle_count = len(self.__particle_system.particles)
-        self.__particle_lifetime = int(self.__particle_system.settings.lifetime)
 
         return True
 
-    def export(self, output_path, filename, frame_start, frame_end):
+    def export(self, output_path, filename, frame_start, frame_end, flip_yz):
         #create collections to collect the particle data
         particleDictionary = {}
 
@@ -57,8 +56,13 @@ class ParticleExporter():
 
                 if state[i] == 'ALIVE':
                     x = particles[i].location.x
-                    y = particles[i].location.y
-                    z = particles[i].location.z
+
+                    if(flip_yz):
+                        y = particles[i].location.z
+                        z = particles[i].location.y
+                    else:
+                        y = particles[i].location.y
+                        z = particles[i].location.z
 
                     info = {'x': x, 'y': y, 'z': z}
 
@@ -69,15 +73,22 @@ class ParticleExporter():
             print(f, end='\r')
 
         #save to file
+        project_directory = os.path.dirname(bpy.data.filepath)
+        os.chdir(project_directory)
+
         directory = os.path.dirname(output_path)
+        directory = os.path.abspath(directory)
+        print(directory)
 
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        fullpath = os.path.join(output_path, filename)
+        fullpath = os.path.join(output_path, filename + ".bpt")
 
         file = open(fullpath, "wb")
         file.write(struct.pack('<f', len(particleDictionary.keys())))
+        file.write(struct.pack('<f', frame_start))
+        file.write(struct.pack('<f', frame_end))
 
         for key in particleDictionary.keys():
             print(key, end='\r')
@@ -89,18 +100,13 @@ class ParticleExporter():
             file.write(lenByte)
             file.write(birthByte)
 
-            for i in range(self.__particle_lifetime):
+            for i in range(length):
                 if i < length:
                     info = particleDictionary[key]["info"][i]
 
                     x = struct.pack('<f', info["x"])
                     y = struct.pack('<f', info["y"])
                     z = struct.pack('<f', info["z"])
-
-                else:
-                    x = struct.pack('<f', 0)
-                    y = x
-                    z = x
 
                 file.write(x)
                 file.write(y)
